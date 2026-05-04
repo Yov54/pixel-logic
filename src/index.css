@@ -1,0 +1,87 @@
+@import "tailwindcss";
+
+:root {
+  --theme-light: #F3E9DC;
+  --theme-sand: #DAB49D;
+  --theme-accent: #C08552;
+  --theme-mid: #895737;
+  --theme-dark: #5E3023;
+
+  --bg: var(--theme-light);
+  --surface: rgba(255, 249, 240, 0.92);
+  --surface-soft: rgba(218, 180, 157, 0.22);
+  --surface-dark-soft: rgba(94, 48, 35, 0.08);
+  --surface-dark-solid: rgba(94, 48, 35, 0.92);
+  --border: rgba(94, 48, 35, 0.22);
+  --shadow: 0 30px 60px rgba(94, 48, 35, 0.14);
+  --text: var(--theme-dark);
+  --text-muted: rgba(137, 87, 55, 0.8);
+}
+
+html,
+body {
+  min-height: 100%;
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+}
+
+body {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+::selection {
+  background: rgba(192, 133, 82, 0.35);
+}
+
+.bg-theme-light { background-color: var(--theme-light); }
+.bg-theme-sand { background-color: var(--theme-sand); }
+.bg-theme-accent { background-color: var(--theme-accent); }
+.bg-theme-mid { background-color: var(--theme-mid); }
+.bg-theme-dark { background-color: var(--theme-dark); }
+.bg-theme-surface { background: var(--surface); }
+.bg-theme-sand-soft { background: var(--surface-soft); }
+.bg-theme-dark-soft { background: var(--surface-dark-soft); }
+.bg-theme-dark-solid { background: var(--surface-dark-solid); }
+.bg-theme-accent-50 { background: rgba(192, 133, 82, 0.5); }
+.bg-theme-dark-solid-50 { background: rgba(94, 48, 35, 0.5); }
+.bg-theme-surface-50 { background: rgba(255, 249, 240, 0.5); }
+.text-theme-dark { color: var(--text); }
+.text-theme-mid { color: var(--theme-mid); }
+.text-theme-light { color: var(--theme-light); }
+.text-theme-accent { color: var(--theme-accent); }
+.text-theme-sand { color: var(--theme-sand); }
+.text-theme-muted { color: var(--text-muted); }
+.border-theme { border-color: var(--border); }
+.border-theme-accent { border-color: rgba(192, 133, 82, 0.35); }
+.shadow-theme { box-shadow: var(--shadow); }
+.text-theme-mid-soft { color: rgba(137, 87, 55, 0.72); }
+.tile-default { background: rgba(94, 48, 35, 0.09); border-color: rgba(94, 48, 35, 0.2); }
+.tile-default:hover { background: rgba(137, 87, 55, 0.12); }
+.tile-correct { background: #895737; border-color: #DAB49D; }
+.tile-wrong { background: #5E3023; border-color: #895737; }
+@keyframes tilePopMain {
+  0% { transform: scale(1); box-shadow: 0 0 0 rgba(192, 133, 82, 0); background: rgba(94, 48, 35, 0.09); }
+  40% { transform: scale(1.15); box-shadow: 0 0 30px rgba(192, 133, 82, 1); background: #C08552; border-color: #895737; }
+  100% { transform: scale(1.05); box-shadow: 0 0 15px rgba(192, 133, 82, 0.8); background: #C08552; border-color: #895737; }
+}
+
+@keyframes tilePopDistractor {
+  0% { transform: scale(1); box-shadow: 0 0 0 rgba(230, 57, 70, 0); background: rgba(94, 48, 35, 0.09); }
+  40% { transform: scale(1.15); box-shadow: 0 0 30px rgba(230, 57, 70, 1); background: #e63946; border-color: #a81c27; }
+  100% { transform: scale(1.05); box-shadow: 0 0 15px rgba(230, 57, 70, 0.8); background: #e63946; border-color: #a81c27; }
+}
+
+.tile-flash-main { 
+  animation: tilePopMain 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; 
+}
+.tile-flash-alt { background: #895737; border-color: #DAB49D; box-shadow: 0 0 20px rgba(137, 87, 55, 0.8); }
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-10px); }
+  40%, 80% { transform: translateX(10px); }
+}
+
+.tile-flash-distractor { 
+  animation: tilePopDistractor 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; 
+}
