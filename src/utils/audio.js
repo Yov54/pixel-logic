@@ -16,7 +16,7 @@ export const initAudio = () => {
     masterGain.connect(audioCtx.destination);
     masterGain.gain.value = 0.3; // Default 30% volume
 
-    bgmAudio = new Audio('/sound/happy-relaxing-loop.mp3');
+    bgmAudio = new Audio(`${import.meta.env.BASE_URL}sound/happy-relaxing-loop.mp3`);
     bgmAudio.loop = true;
     bgmAudio.volume = 0.3; // Lower volume for BGM so it's not too loud
 
