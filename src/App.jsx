@@ -9,6 +9,7 @@ import TutorialModal from "./components/TutorialModal";
 import StartScreen from "./components/StartScreen";
 import SettingsModal from "./components/SettingsModal";
 import PauseModal from "./components/PauseModal";
+import LeaderboardModal from "./components/LeaderboardModal";
 import useGameLogic from "./hooks/useGameLogic";
 
 import { AlertOctagon, RefreshCw, RotateCcw, Zap, BookOpen, X, Terminal, Settings, Redo, EyeOff, Calculator } from "lucide-react";
@@ -22,6 +23,7 @@ export default function App() {
   const [previewRule, setPreviewRule] = useState(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isPauseOpen, setIsPauseOpen] = useState(false);
+  const [isLeaderboardOpen, setIsLeaderboardOpen] = useState(false);
   const [hasEntered, setHasEntered] = useState(false);
 
   useEffect(() => {
@@ -92,6 +94,9 @@ export default function App() {
           }}
           openSettings={() => setIsSettingsOpen(true)}
           openManual={() => setCheatSheetOpen(true)}
+          openLeaderboard={() => setIsLeaderboardOpen(true)}
+          playerName={game.playerName}
+          onPlayerNameChange={game.updatePlayerName}
         />
       )}
 
@@ -143,6 +148,14 @@ export default function App() {
         onOpenSettings={() => setIsSettingsOpen(true)} 
         onRestart={() => { setIsPauseOpen(false); game.startGame(game.difficulty); }} 
         onQuit={() => { setIsPauseOpen(false); setHasEntered(false); }} 
+        onOpenLeaderboard={() => { setIsPauseOpen(false); setIsLeaderboardOpen(true); }}
+      />
+
+      <LeaderboardModal
+        isOpen={isLeaderboardOpen}
+        onClose={() => setIsLeaderboardOpen(false)}
+        playerName={game.playerName}
+        currentDifficulty={game.difficulty}
       />
 
       {/* HEADER */}
@@ -196,6 +209,9 @@ export default function App() {
             startGame={game.startGame}
             nextLevel={game.nextLevel}
             score={game.score}
+            isNewPersonalBest={game.isNewPersonalBest}
+            isSubmitting={game.isSubmitting}
+            onOpenLeaderboard={() => setIsLeaderboardOpen(true)}
           />
         </div>
 

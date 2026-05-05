@@ -1,6 +1,6 @@
-import { Pause, Play, Settings, RotateCcw, Home } from "lucide-react";
+import { Pause, Play, Settings, RotateCcw, Home, Trophy } from "lucide-react";
 
-export default function PauseModal({ isOpen, onResume, onOpenSettings, onRestart, onQuit }) {
+export default function PauseModal({ isOpen, onResume, onOpenSettings, onRestart, onQuit, onOpenLeaderboard }) {
   if (!isOpen) return null;
 
   return (
@@ -26,6 +26,11 @@ export default function PauseModal({ isOpen, onResume, onOpenSettings, onRestart
           <button onClick={onResume} className="w-full flex items-center justify-center gap-3 py-3 px-4 bg-theme-accent text-theme-dark border-2 border-theme-accent rounded hover:bg-transparent hover:text-theme-accent transition-all group active:scale-95">
             <Play className="w-5 h-5 group-hover:scale-110 transition-transform" />
             RESUME
+          </button>
+          
+          <button onClick={onOpenLeaderboard} className="w-full flex items-center justify-center gap-3 py-3 px-4 bg-theme-dark text-theme-light border-2 border-theme-mid rounded hover:bg-theme-mid transition-all group active:scale-95">
+            <Trophy className="w-5 h-5 group-hover:scale-110 transition-transform" />
+            LEADERBOARD
           </button>
           
           <button onClick={onOpenSettings} className="w-full flex items-center justify-center gap-3 py-3 px-4 bg-theme-dark text-theme-light border-2 border-theme-mid rounded hover:bg-theme-mid transition-all group active:scale-95">

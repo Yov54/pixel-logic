@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import { Heart, Settings, BookOpen } from "lucide-react";
+import { Heart, Settings, BookOpen, Trophy } from "lucide-react";
 
-export default function StartScreen({ onStart, openSettings, openManual }) {
+export default function StartScreen({ onStart, openSettings, openManual, openLeaderboard, playerName, onPlayerNameChange }) {
   const [highScore, setHighScore] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [selectedDifficulty, setSelectedDifficulty] = useState('medium');
+  const [nameInput, setNameInput] = useState(playerName || '');
 
   useEffect(() => {
     let savedScore = localStorage.getItem(`pixelLogicHighScore_${selectedDifficulty}`);
@@ -20,12 +21,21 @@ export default function StartScreen({ onStart, openSettings, openManual }) {
     setHighScore(savedScore ? parseInt(savedScore, 10) : 0);
   }, [selectedDifficulty]);
 
+  const handleNameChange = (e) => {
+    const value = e.target.value.toUpperCase().replace(/[^A-Z0-9_]/g, '').slice(0, 12);
+    setNameInput(value);
+    onPlayerNameChange(value);
+  };
+
   const handleStartClick = () => {
+    if (!nameInput || nameInput.length < 1) return;
     setIsTransitioning(true);
     setTimeout(() => {
       onStart(selectedDifficulty);
     }, 700);
   };
+
+  const isNameValid = nameInput.length >= 1;
 
   return (
     <div className={`fixed inset-0 z-[200] bg-theme-light flex flex-col justify-center items-center font-sans overflow-hidden transition-all duration-700 ease-in-out ${isTransitioning ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
@@ -83,7 +93,23 @@ export default function StartScreen({ onStart, openSettings, openManual }) {
 
               {/* Bottom Menu */}
               <div className="flex flex-col items-center gap-2 sm:gap-4 font-mono text-theme-sand">
-                <p className="text-[#F3E9DC] text-xs sm:text-sm md:text-base font-bold tracking-[0.2em] drop-shadow-[0_0_8px_rgba(243,233,220,0.5)]">
+                
+                {/* Player Name Input */}
+                <div className="flex flex-col items-center gap-1">
+                  <label className="text-[#F3E9DC] text-[10px] sm:text-xs font-bold tracking-[0.2em] opacity-60">
+                    ENTER CALLSIGN
+                  </label>
+                  <input
+                    type="text"
+                    value={nameInput}
+                    onChange={handleNameChange}
+                    maxLength={12}
+                    placeholder="YOUR NAME"
+                    className="w-48 sm:w-56 text-center bg-transparent border-b-2 border-theme-accent/60 text-theme-accent text-sm sm:text-lg font-bold tracking-[0.3em] py-1 placeholder-theme-sand/30 focus:outline-none focus:border-theme-accent transition-colors uppercase"
+                  />
+                </div>
+
+                <p className="text-[#F3E9DC] text-xs sm:text-sm md:text-base font-bold tracking-[0.2em] drop-shadow-[0_0_8px_rgba(243,233,220,0.5)] mt-2">
                   SELECT DIFFICULTY
                 </p>
 
@@ -109,10 +135,18 @@ export default function StartScreen({ onStart, openSettings, openManual }) {
                 <div className={`mt-2 sm:mt-4 transition-transform duration-500 delay-200 ${isTransitioning ? 'scale-150 opacity-0' : 'scale-100'}`}>
                   <button
                     onClick={handleStartClick}
-                    className="px-8 py-2 sm:px-12 sm:py-3 bg-theme-accent text-theme-dark text-sm sm:text-xl font-bold tracking-widest rounded shadow-[0_0_15px_rgba(192,133,82,0.6)] hover:bg-theme-mid hover:text-white hover:shadow-[0_0_20px_rgba(192,133,82,0.9)] hover:-translate-y-1 active:translate-y-0 active:scale-95 transition-all uppercase"
+                    disabled={!isNameValid}
+                    className={`px-8 py-2 sm:px-12 sm:py-3 text-sm sm:text-xl font-bold tracking-widest rounded shadow-[0_0_15px_rgba(192,133,82,0.6)] transition-all uppercase ${
+                      isNameValid
+                        ? 'bg-theme-accent text-theme-dark hover:bg-theme-mid hover:text-white hover:shadow-[0_0_20px_rgba(192,133,82,0.9)] hover:-translate-y-1 active:translate-y-0 active:scale-95 cursor-pointer'
+                        : 'bg-theme-mid/40 text-theme-sand/40 cursor-not-allowed shadow-none'
+                    }`}
                   >
                     START
                   </button>
+                  {!isNameValid && (
+                    <p className="text-center text-[10px] text-red-400/80 mt-1 tracking-widest">CALLSIGN REQUIRED</p>
+                  )}
                 </div>
               </div>
 
@@ -121,6 +155,19 @@ export default function StartScreen({ onStart, openSettings, openManual }) {
 
           {/* In-Screen Action Icons (Bottom Right) */}
           <div className="absolute bottom-4 right-4 sm:bottom-6 sm:right-8 flex gap-3 sm:gap-4 text-theme-sand z-50">
+            {/* LEADERBOARD */}
+            <div className="relative group flex items-center justify-center">
+              <div className="absolute bottom-full mb-3 px-3 py-1.5 bg-theme-dark-solid text-theme-light text-xs font-mono font-bold tracking-widest rounded border border-theme-accent whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none drop-shadow-[0_0_5px_rgba(192,133,82,0.3)]">
+                LEADERBOARD
+              </div>
+              <button
+                onClick={(e) => { e.stopPropagation(); openLeaderboard(); }}
+                className="w-10 h-10 sm:w-12 sm:h-12 bg-theme-dark rounded-full flex items-center justify-center border-2 border-theme-mid shadow-[0_0_15px_rgba(44,24,20,0.8)] hover:bg-theme-mid hover:text-white transition-all hover:scale-110 active:scale-95 z-30 cursor-pointer relative"
+              >
+                <Trophy className="w-4 h-4 sm:w-5 sm:h-5" />
+              </button>
+            </div>
+
             {/* MANUAL */}
             <div className="relative group flex items-center justify-center">
               <div className="absolute bottom-full mb-3 px-3 py-1.5 bg-theme-dark-solid text-theme-light text-xs font-mono font-bold tracking-widest rounded border border-theme-accent whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none drop-shadow-[0_0_5px_rgba(192,133,82,0.3)]">

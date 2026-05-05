@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { sleep, getMirroredIndex } from "../utils/helpers";
 import { playFlash, playCorrect, playWrong, playLevelUp, playGameOver, initAudio } from "../utils/audio";
+import { submitScore, getGlobalHighScore } from "../utils/firebase";
 
 export default function useGameLogic() {
   const [gameState, setGameState] = useState('idle');
@@ -12,6 +13,12 @@ export default function useGameLogic() {
     const saved = localStorage.getItem('pixelLogicHighScore');
     return saved ? parseInt(saved, 10) : 0;
   });
+
+  const [playerName, setPlayerName] = useState(() => {
+    return localStorage.getItem('pixelLogicPlayerName') || '';
+  });
+  const [isNewPersonalBest, setIsNewPersonalBest] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [hintCost, setHintCost] = useState(20);
 
@@ -30,6 +37,12 @@ export default function useGameLogic() {
   const [systemMessage, setSystemMessage] = useState("SYSTEM STANDBY");
   const [seenRules, setSeenRules] = useState(new Set());
   const [isErrorState, setIsErrorState] = useState(false);
+
+  const updatePlayerName = (name) => {
+    const upperName = name.toUpperCase();
+    setPlayerName(upperName);
+    localStorage.setItem('pixelLogicPlayerName', upperName);
+  };
 
   const getRotatedIndex = (idx, size) => {
     const r = Math.floor(idx / size);
@@ -127,6 +140,7 @@ export default function useGameLogic() {
     setLevel(1);
     setHintCost(20);
     setSeenRules(new Set());
+    setIsNewPersonalBest(false);
     
     let saved = localStorage.getItem(`pixelLogicHighScore_${selectedDifficulty}`);
     if (!saved && selectedDifficulty === 'medium') {
@@ -231,10 +245,22 @@ export default function useGameLogic() {
       
       if (newLives <= 0) {
         setGameState('gameOver');
+        
+        // Check personal best
         if (score > highScore) {
           setHighScore(score);
+          setIsNewPersonalBest(true);
           localStorage.setItem(`pixelLogicHighScore_${difficulty}`, score.toString());
         }
+        
+        // Submit to Firebase (async, non-blocking)
+        if (score > 0 && playerName) {
+          setIsSubmitting(true);
+          submitScore(playerName, score, level, difficulty).finally(() => {
+            setIsSubmitting(false);
+          });
+        }
+        
         setSystemMessage("SYSTEM FAILURE. CONNECTION LOST.");
         playGameOver();
       } else {
@@ -270,6 +296,8 @@ export default function useGameLogic() {
     gameState, level, lives, score, highScore, difficulty,
     levelData, playerSeq, activeFlash, clickedTile,
     systemMessage, isErrorState, hintCost,
-    startGame, handleTileClick, nextLevel, startFromTutorial, useHint
+    playerName, isNewPersonalBest, isSubmitting,
+    startGame, handleTileClick, nextLevel, startFromTutorial, useHint,
+    updatePlayerName
   };
 }
