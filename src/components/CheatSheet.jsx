@@ -36,7 +36,7 @@ export default function CheatSheet({ isOpen, onClose, onSelectRule }) {
               Welcome to the PIXEL LOGIC simulation. Your objective is to observe the light sequences generated on the matrix and reproduce them according to the active execution rules.
             </p>
             <div className="bg-theme-dark-soft p-4 rounded-lg border-l-4 border-theme-accent shadow-md">
-              <p className="font-mono text-xs sm:text-sm text-theme-light flex items-center gap-3">
+              <p className="font-mono text-xs sm:text-sm text-theme-dark flex items-center gap-3">
                 <Terminal className="w-4 h-4 text-theme-accent shrink-0" /> 
                 System Integrity: You have 3 lives (❤️). Every incorrect input will decrement your life counter. Game Over occurs when integrity reaches zero.
               </p>
