@@ -64,7 +64,7 @@ export default function StartScreen({ onStart, openSettings, openManual, openLea
           <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0)_50%,rgba(0,0,0,0.25)_50%)] bg-[length:100%_4px] pointer-events-none z-10"></div>
 
           {/* --- CONTENT LAYER --- */}
-          <div className="relative z-20 flex-1 flex flex-col p-4 sm:p-8 md:p-12 justify-between">
+          <div className="relative z-20 flex-1 flex flex-col p-3 sm:px-8 sm:py-4 md:px-12 md:py-6 justify-between overflow-y-auto no-scrollbar">
 
             {/* Top Bar: Hi-score & Hearts */}
             <div className="flex justify-between items-start font-mono text-theme-sand shrink-0">
@@ -82,17 +82,17 @@ export default function StartScreen({ onStart, openSettings, openManual, openLea
             </div>
 
             {/* Center Area: Title & Menu */}
-            <div className="flex-1 flex flex-col items-center justify-center gap-4 sm:gap-6 pb-12 sm:pb-24 -translate-y-8 sm:-translate-y-12 md:-translate-y-16">
+            <div className="flex-1 flex flex-col items-center justify-center w-full min-h-0 py-2 sm:py-4 -translate-y-1 sm:-translate-y-3">
               
               {/* Center Title */}
-              <div className="flex flex-col items-center justify-center mt-4 sm:mt-0">
-                <h1 className="text-6xl sm:text-8xl md:text-9xl font-mono font-bold text-theme-accent text-center uppercase leading-none drop-shadow-[0_0_15px_rgba(192,133,82,0.8)]">
+              <div className="flex flex-col items-center justify-center shrink-0">
+                <h1 className="text-[14vh] sm:text-[18vh] md:text-[20vh] max-text-9xl font-mono font-bold text-theme-accent text-center uppercase leading-none drop-shadow-[0_0_15px_rgba(192,133,82,0.8)]">
                   PIXEL<br />LOGIC
                 </h1>
               </div>
 
               {/* Bottom Menu */}
-              <div className="flex flex-col items-center gap-2 sm:gap-4 font-mono text-theme-sand">
+              <div className="flex flex-col items-center gap-1 sm:gap-2 font-mono text-theme-sand mt-1 sm:mt-2 shrink-0">
                 
                 {/* Player Name Input */}
                 <div className="flex flex-col items-center gap-1">
@@ -109,11 +109,11 @@ export default function StartScreen({ onStart, openSettings, openManual, openLea
                   />
                 </div>
 
-                <p className="text-[#F3E9DC] text-xs sm:text-sm md:text-base font-bold tracking-[0.2em] drop-shadow-[0_0_8px_rgba(243,233,220,0.5)] mt-2">
+                <p className="text-[#F3E9DC] text-[10px] sm:text-xs md:text-sm font-bold tracking-[0.2em] drop-shadow-[0_0_8px_rgba(243,233,220,0.5)] mt-1 sm:mt-2">
                   SELECT DIFFICULTY
                 </p>
 
-                <div className={`flex flex-col sm:flex-row flex-wrap justify-center gap-4 sm:gap-8 md:gap-12 w-full text-sm sm:text-lg md:text-xl font-bold tracking-widest transition-transform duration-500 delay-100 ${isTransitioning ? 'scale-150 opacity-0' : 'scale-100'}`}>
+                <div className={`flex flex-col sm:flex-row flex-wrap justify-center gap-3 sm:gap-6 md:gap-8 w-full text-xs sm:text-sm md:text-lg font-bold tracking-widest transition-transform duration-500 delay-100 ${isTransitioning ? 'scale-150 opacity-0' : 'scale-100'}`}>
                   {['easy', 'medium', 'hard'].map(diff => (
                     <button
                       key={diff}
@@ -132,11 +132,11 @@ export default function StartScreen({ onStart, openSettings, openManual, openLea
                 </div>
                 
                 {/* START Button */}
-                <div className={`mt-2 sm:mt-4 transition-transform duration-500 delay-200 ${isTransitioning ? 'scale-150 opacity-0' : 'scale-100'}`}>
+                <div className={`mt-1 sm:mt-3 transition-transform duration-500 delay-200 ${isTransitioning ? 'scale-150 opacity-0' : 'scale-100'}`}>
                   <button
                     onClick={handleStartClick}
                     disabled={!isNameValid}
-                    className={`px-8 py-2 sm:px-12 sm:py-3 text-sm sm:text-xl font-bold tracking-widest rounded shadow-[0_0_15px_rgba(192,133,82,0.6)] transition-all uppercase ${
+                    className={`px-6 py-2 sm:px-10 sm:py-2.5 text-xs sm:text-sm md:text-lg font-bold tracking-widest rounded shadow-[0_0_15px_rgba(192,133,82,0.6)] transition-all uppercase ${
                       isNameValid
                         ? 'bg-theme-accent text-theme-dark hover:bg-theme-mid hover:text-white hover:shadow-[0_0_20px_rgba(192,133,82,0.9)] hover:-translate-y-1 active:translate-y-0 active:scale-95 cursor-pointer'
                         : 'bg-theme-mid/40 text-theme-sand/40 cursor-not-allowed shadow-none'
