@@ -7,32 +7,43 @@ export default function LeaderboardModal({ isOpen, onClose }) {
   const [difficulty, setDifficulty] = useState('medium');
   const [scores, setScores] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [cachedGlobalData, setCachedGlobalData] = useState(null);
 
+  // 1. Fetch exactly once when the modal opens
+  useEffect(() => {
+    if (isOpen) {
+      const fetchGlobalData = async () => {
+        setIsLoading(true);
+        const globalData = await getGlobalLeaderboard();
+        setCachedGlobalData(globalData || {});
+        setIsLoading(false);
+      };
+      fetchGlobalData();
+    } else {
+      // Clear cache when closed so next open fetches fresh data
+      setCachedGlobalData(null);
+    }
+  }, [isOpen]);
+
+  // 2. Display logic: Filter data based on active tab and difficulty
   useEffect(() => {
     if (!isOpen) return;
 
-    const fetchScores = async () => {
-      setIsLoading(true);
-      if (activeTab === 'global') {
-        const globalData = await getGlobalLeaderboard();
-        if (globalData && globalData[difficulty]) {
-          setScores(globalData[difficulty]);
-        } else {
-          setScores([]);
-        }
+    if (activeTab === 'global') {
+      if (isLoading || !cachedGlobalData) {
+        setScores([]);
       } else {
-        const localHistory = JSON.parse(localStorage.getItem('pixelLogicScoreHistory') || '[]');
-        const filtered = localHistory
-          .filter(entry => entry.difficulty === difficulty)
-          .sort((a, b) => b.score - a.score)
-          .slice(0, 100);
-        setScores(filtered);
+        setScores(cachedGlobalData[difficulty] || []);
       }
-      setIsLoading(false);
-    };
-
-    fetchScores();
-  }, [isOpen, activeTab, difficulty]);
+    } else {
+      const localHistory = JSON.parse(localStorage.getItem('pixelLogicScoreHistory') || '[]');
+      const filtered = localHistory
+        .filter(entry => entry.difficulty === difficulty)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 100);
+      setScores(filtered);
+    }
+  }, [isOpen, activeTab, difficulty, cachedGlobalData, isLoading]);
 
   if (!isOpen) return null;
 
