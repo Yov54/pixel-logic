@@ -13,7 +13,8 @@ export default function GameBoard({
   setCheatSheetOpen,
   setIsPauseOpen,
   isMultiplayer = false,
-  openSettings = () => {}
+  openSettings = () => {},
+  backToMenu = () => {}
 }) {
   return (
     <div className="flex-1 min-h-0 w-full flex flex-col items-center relative">
@@ -73,6 +74,7 @@ export default function GameBoard({
             difficulty={game.difficulty}
             highScore={game.highScore}
             freezeTimeLeft={game.freezeTimeLeft}
+            backToMenu={backToMenu}
           />
         </div>
 

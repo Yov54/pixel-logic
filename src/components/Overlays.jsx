@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { ShieldAlert, Play, RefreshCw, AlertTriangle } from "lucide-react";
+import { ShieldAlert, Play, RefreshCw, AlertTriangle, Home } from "lucide-react";
 
 export default function Overlays({
   gameState,
@@ -9,7 +9,8 @@ export default function Overlays({
   score,
   difficulty = 'medium',
   highScore = 0,
-  freezeTimeLeft = 0
+  freezeTimeLeft = 0,
+  backToMenu = () => {}
 }) {
   const [gameOverPhase, setGameOverPhase] = useState(0);
   const [restartCountdown, setRestartCountdown] = useState(3);
@@ -147,18 +148,30 @@ export default function Overlays({
                     </div>
                   </div>
 
-                  <button
-                    onClick={handleRestart}
-                    disabled={restartCountdown > 0}
-                    className={`group w-full flex items-center justify-center gap-3 px-6 py-4 rounded font-bold tracking-widest transition-all border-2 ${
-                      restartCountdown > 0
-                        ? 'bg-theme-surface text-theme-muted border-theme cursor-not-allowed'
-                        : 'bg-theme-accent hover:bg-theme-mid text-theme-dark hover:text-theme-light border-theme-accent hover:border-theme-light shadow-[0_0_15px_rgba(192,133,82,0.6)] cursor-pointer'
-                    }`}
-                  >
-                    <RefreshCw className={`w-5 h-5 ${restartCountdown === 0 ? 'group-hover:rotate-180 transition-transform duration-500' : ''}`} />
-                    {restartCountdown > 0 ? `REBOOTING IN ${restartCountdown}...` : 'REBOOT SYSTEM'}
-                  </button>
+                  <div className="w-full flex flex-col gap-3">
+                    <button
+                      onClick={handleRestart}
+                      disabled={restartCountdown > 0}
+                      className={`group w-full flex items-center justify-center gap-3 px-6 py-4 rounded font-bold tracking-widest transition-all border-2 ${
+                        restartCountdown > 0
+                          ? 'bg-theme-surface text-theme-muted border-theme cursor-not-allowed'
+                          : 'bg-theme-accent hover:bg-theme-mid text-theme-dark hover:text-theme-light border-theme-accent hover:border-theme-light shadow-[0_0_15px_rgba(192,133,82,0.6)] cursor-pointer'
+                      }`}
+                    >
+                      <RefreshCw className={`w-5 h-5 ${restartCountdown === 0 ? 'group-hover:rotate-180 transition-transform duration-500' : ''}`} />
+                      {restartCountdown > 0 ? `REBOOTING IN ${restartCountdown}...` : 'REBOOT SYSTEM'}
+                    </button>
+
+                    {restartCountdown === 0 && (
+                      <button
+                        onClick={backToMenu}
+                        className="group w-full flex items-center justify-center gap-3 px-6 py-3 rounded font-bold tracking-widest transition-all border-2 border-theme-mid text-theme-sand hover:bg-theme-dark-soft hover:text-white cursor-pointer"
+                      >
+                        <Home className="w-4 h-4" />
+                        MAIN MENU
+                      </button>
+                    )}
+                  </div>
                 </div>
               )}
             </>

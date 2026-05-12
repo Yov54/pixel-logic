@@ -220,6 +220,7 @@ export default function App() {
           setManualTutorialOpen={setManualTutorialOpen}
           setCheatSheetOpen={setCheatSheetOpen}
           setIsPauseOpen={setIsPauseOpen}
+          backToMenu={() => setAppMode('menu')}
         />
       )}
 
