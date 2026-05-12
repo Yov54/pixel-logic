@@ -1,21 +1,22 @@
 import { useState, useEffect } from "react";
 import { initAudio } from "./utils/audio";
-import Header from "./components/Header";
-import GameGrid from "./components/GameGrid";
-import Overlays from "./components/Overlays";
-import MissionPanel from "./components/MissionPanel";
-import CheatSheet from "./components/CheatSheet";
 import TutorialModal from "./components/TutorialModal";
 import StartScreen from "./components/StartScreen";
 import SettingsModal from "./components/SettingsModal";
 import PauseModal from "./components/PauseModal";
-import LeaderboardModal from "./components/LeaderboardModal";
+import CheatSheet from "./components/CheatSheet";
+import GameBoard from "./components/GameBoard";
+import AdminPanel from "./components/AdminPanel";
+import StudentLobby from "./components/StudentLobby";
 import useGameLogic from "./hooks/useGameLogic";
 
-import { AlertOctagon, RefreshCw, RotateCcw, Zap, BookOpen, X, Terminal, Settings, Redo, EyeOff, Calculator } from "lucide-react";
+import { AlertOctagon, RefreshCw, RotateCcw, Zap, EyeOff, Calculator, Keyboard, Redo } from "lucide-react";
 
 export default function App() {
   const game = useGameLogic();
+  const [appMode, setAppMode] = useState('menu'); // 'menu', 'solo', 'host', 'join'
+  const [multiplayerSettings, setMultiplayerSettings] = useState(null);
+
   const [isManualTutorialOpen, setManualTutorialOpen] = useState(false);
   const [hasClosedFirstTutorial, setHasClosedFirstTutorial] = useState(false);
   const [showHelpTooltip, setShowHelpTooltip] = useState(false);
@@ -23,12 +24,29 @@ export default function App() {
   const [previewRule, setPreviewRule] = useState(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isPauseOpen, setIsPauseOpen] = useState(false);
-  const [isLeaderboardOpen, setIsLeaderboardOpen] = useState(false);
-  const [hasEntered, setHasEntered] = useState(false);
 
   useEffect(() => {
     initAudio();
   }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (game.gameState !== 'playing') return;
+      if (game.levelData.rule !== 'keypad' && game.levelData.rule !== 'keypad_random') return;
+      
+      const key = e.key.toUpperCase();
+      const labels = game.levelData.keypadLabels;
+      if (labels) {
+        const index = labels.indexOf(key);
+        if (index !== -1) {
+          game.handleTileClick(index);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [game.gameState, game.levelData, game.handleTileClick]);
 
   const getRuleDescription = (ruleId = game.levelData.rule) => {
     const baseRule = ruleId.startsWith('math') ? 'math' : ruleId;
@@ -71,6 +89,18 @@ export default function App() {
           desc: `Index transformation active. Shift every target index by ${mathMod > 0 ? '+1' : '-1'} (wrap around).`,
           icon: <Calculator className="w-5 h-5 text-theme-dark" />
         };
+      case 'keypad':
+        return {
+          title: 'Keypad Protocol',
+          desc: 'Mouse clicks disabled. Press the corresponding keyboard key shown on the tile.',
+          icon: <Keyboard className="w-5 h-5 text-theme-dark" />
+        };
+      case 'keypad_random':
+        return {
+          title: 'Scrambled Keypad',
+          desc: 'Keyboard only. The key mapping is randomly shuffled on the grid. Find the right key.',
+          icon: <Keyboard className="w-5 h-5 text-theme-accent" />
+        };
       default:
         return {
           title: 'Standard Array',
@@ -85,30 +115,15 @@ export default function App() {
   return (
     <div className="h-[100dvh] w-full overflow-hidden bg-theme-light text-theme-dark font-sans flex flex-col items-center p-2 sm:p-4 md:p-6 relative">
 
-      {!hasEntered && (
-        <StartScreen
-          onStart={(difficulty) => {
-            initAudio();
-            game.startGame(difficulty);
-            setHasEntered(true);
-          }}
-          openSettings={() => setIsSettingsOpen(true)}
-          openManual={() => setCheatSheetOpen(true)}
-          openLeaderboard={() => setIsLeaderboardOpen(true)}
-          playerName={game.playerName}
-          onPlayerNameChange={game.updatePlayerName}
-        />
-      )}
-
-      {/* RED FLASH OVERLAY */}
+      {/* OVERLAYS & MODALS */}
       {game.isErrorState && (
         <div className="fixed inset-0 bg-red-600/20 pointer-events-none z-[100] animate-pulse"></div>
       )}
 
       {(game.gameState === 'tutorial' || isManualTutorialOpen || previewRule) && (
         <TutorialModal
-          rule={previewRule || game.levelData.rule}
-          ruleInfo={getRuleDescription(previewRule || game.levelData.rule)}
+          rule={previewRule || (game.levelData.rule === 'math' ? `math_${game.levelData.mathModifier}` : game.levelData.rule)}
+          ruleInfo={getRuleDescription(previewRule || (game.levelData.rule === 'math' ? `math_${game.levelData.mathModifier}` : game.levelData.rule))}
           onClose={() => {
             if (previewRule) {
               setPreviewRule(null);
@@ -130,7 +145,6 @@ export default function App() {
         />
       )}
 
-      {/* CHEAT SHEET MODAL */}
       <CheatSheet
         isOpen={isCheatSheetOpen}
         onClose={() => setCheatSheetOpen(false)}
@@ -141,106 +155,73 @@ export default function App() {
       />
 
       <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
+
+      <PauseModal
+        isOpen={isPauseOpen}
+        onResume={() => setIsPauseOpen(false)}
+        onOpenSettings={() => setIsSettingsOpen(true)}
+        onRestart={() => { setIsPauseOpen(false); game.startGame(game.difficulty); }}
+        onQuit={() => { setIsPauseOpen(false); setAppMode('menu'); }}
+      />
+
+
+      {/* ROUTING / VIEWS */}
       
-      <PauseModal 
-        isOpen={isPauseOpen} 
-        onResume={() => setIsPauseOpen(false)} 
-        onOpenSettings={() => setIsSettingsOpen(true)} 
-        onRestart={() => { setIsPauseOpen(false); game.startGame(game.difficulty); }} 
-        onQuit={() => { setIsPauseOpen(false); setHasEntered(false); }} 
-        onOpenLeaderboard={() => { setIsPauseOpen(false); setIsLeaderboardOpen(true); }}
-      />
+      {appMode === 'menu' && (
+        <StartScreen
+          onStartSolo={(difficulty, username) => {
+            initAudio();
+            game.startGame(difficulty, false, null, username);
+            setAppMode('solo');
+          }}
+          onHost={(settings) => {
+            initAudio();
+            setMultiplayerSettings(settings);
+            setAppMode('host');
+          }}
+          onJoin={(username, roomCode) => {
+            initAudio();
+            setMultiplayerSettings({ username, roomCode });
+            setAppMode('join');
+          }}
+          openSettings={() => setIsSettingsOpen(true)}
+          openManual={() => setCheatSheetOpen(true)}
+        />
+      )}
 
-      <LeaderboardModal
-        isOpen={isLeaderboardOpen}
-        onClose={() => setIsLeaderboardOpen(false)}
-        playerName={game.playerName}
-        currentDifficulty={game.difficulty}
-      />
+      {appMode === 'solo' && (
+        <GameBoard 
+          game={game}
+          ruleInfo={ruleInfo}
+          showHelpTooltip={showHelpTooltip}
+          setShowHelpTooltip={setShowHelpTooltip}
+          setManualTutorialOpen={setManualTutorialOpen}
+          setCheatSheetOpen={setCheatSheetOpen}
+          setIsPauseOpen={setIsPauseOpen}
+        />
+      )}
 
-      {/* HEADER */}
-      <Header
-        lives={game.lives}
-        score={game.score}
-        highScore={game.highScore}
-        onPause={() => setIsPauseOpen(true)}
-      />
+      {appMode === 'host' && (
+        <AdminPanel 
+          settings={multiplayerSettings}
+          onExit={() => setAppMode('menu')}
+        />
+      )}
 
-      {/* MAIN */}
-      <main className={`flex-1 min-h-0 w-full max-w-5xl flex flex-col md:flex-row gap-4 md:gap-8 transition-transform pb-4 ${game.isErrorState ? 'animate-[shake_0.4s_ease-in-out]' : ''}`}>
-
-        {/* LEFT - GAME */}
-        <div className="w-full md:w-7/12 flex flex-col items-center bg-theme-surface p-4 sm:p-6 rounded-2xl border border-theme shadow-theme relative h-full min-h-0 overflow-hidden">
-
-          {/* LEVEL INFO */}
-          <div className="flex w-full justify-between items-center mb-4 px-2 shrink-0">
-            <h2 className="text-lg font-mono text-theme-dark">
-              LEVEL <span className="text-theme-accent">{game.level}</span>
-              <span className="ml-2 text-xs text-theme-mid">
-                [{game.levelData.size}x{game.levelData.size} GRID]
-              </span>
-            </h2>
-
-            <div className={`text-xs font-mono px-3 py-1 rounded-full border ${game.gameState === 'playing'
-                ? 'bg-theme-accent-soft border-theme-accent text-theme-mid animate-pulse'
-                : 'bg-theme-dark-soft border-theme text-theme-mid'
-              }`}>
-              {game.gameState === 'playing' ? 'INPUT REQUIRED' : 'EXECUTING...'}
-            </div>
-          </div>
-
-          {/* GRID */}
-          <div className="flex-1 w-full min-h-0 flex items-center justify-center pb-2">
-            <div className="h-full max-w-full aspect-square relative">
-              <GameGrid
-                levelData={game.levelData}
-                activeFlash={game.activeFlash}
-                clickedTile={game.clickedTile}
-                playerSeq={game.playerSeq}
-                gameState={game.gameState}
-                handleTileClick={game.handleTileClick}
-              />
-            </div>
-          </div>
-
-          {/* OVERLAY */}
-          <Overlays
-            gameState={game.gameState}
-            startGame={game.startGame}
-            nextLevel={game.nextLevel}
-            score={game.score}
-            isNewPersonalBest={game.isNewPersonalBest}
-            isSubmitting={game.isSubmitting}
-            onOpenLeaderboard={() => setIsLeaderboardOpen(true)}
-          />
-        </div>
-
-        {/* RIGHT - INTEL & MANUAL */}
-        <div className="md:col-span-5 flex flex-col gap-4 overflow-y-auto h-full pb-4 pr-1">
-          <MissionPanel
-            ruleInfo={ruleInfo}
-            systemMessage={game.systemMessage}
-            levelData={game.levelData}
-            openTutorial={() => setManualTutorialOpen(true)}
-            showHelpTooltip={showHelpTooltip}
-            closeHelpTooltip={() => setShowHelpTooltip(false)}
-            useHint={game.useHint}
-            hintCost={game.hintCost}
-            score={game.score}
-            gameState={game.gameState}
-          />
-
-          <button
-            onClick={() => setCheatSheetOpen(true)}
-            className="w-full flex items-center justify-center gap-2 bg-theme-dark-soft hover:bg-theme-surface border border-theme text-theme-mid p-3 rounded-xl transition-colors font-mono font-bold text-sm shadow-sm"
-          >
-            <BookOpen className="w-4 h-4" />
-            ACCESS MANUAL
-          </button>
-        </div>
-
-      </main>
-
+      {appMode === 'join' && (
+        <StudentLobby 
+          username={multiplayerSettings.username}
+          roomCode={multiplayerSettings.roomCode}
+          onExit={() => setAppMode('menu')}
+          game={game}
+          ruleInfo={ruleInfo}
+          showHelpTooltip={showHelpTooltip}
+          setShowHelpTooltip={setShowHelpTooltip}
+          setManualTutorialOpen={setManualTutorialOpen}
+          setCheatSheetOpen={setCheatSheetOpen}
+          openSettings={() => setIsSettingsOpen(true)}
+        />
+      )}
 
     </div>
   );

@@ -1,11 +1,23 @@
 import { useState, useEffect, useCallback } from "react";
 import { sleep, getMirroredIndex } from "../utils/helpers";
 import { playFlash, playCorrect, playWrong, playLevelUp, playGameOver, initAudio } from "../utils/audio";
-import { submitScore, getGlobalHighScore } from "../utils/firebase";
+import { saveScoreLocal, syncScoreCloud } from "../utils/leaderboard";
+
+function mulberry32(a) {
+  return function() {
+    var t = a += 0x6D2B79F5;
+    t = Math.imul(t ^ t >>> 15, t | 1);
+    t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  }
+}
+
+let seedRng = Math.random;
 
 export default function useGameLogic() {
   const [gameState, setGameState] = useState('idle');
   const [difficulty, setDifficulty] = useState('easy');
+  const [playerName, setPlayerName] = useState('GUEST');
   const [level, setLevel] = useState(1);
   const [lives, setLives] = useState(3);
   const [score, setScore] = useState(0);
@@ -14,13 +26,8 @@ export default function useGameLogic() {
     return saved ? parseInt(saved, 10) : 0;
   });
 
-  const [playerName, setPlayerName] = useState(() => {
-    return localStorage.getItem('pixelLogicPlayerName') || '';
-  });
-  const [isNewPersonalBest, setIsNewPersonalBest] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
   const [hintCost, setHintCost] = useState(20);
+  const [freezeTimeLeft, setFreezeTimeLeft] = useState(0);
 
   const [levelData, setLevelData] = useState({
     size: 3,
@@ -28,7 +35,8 @@ export default function useGameLogic() {
     flashes: [],
     expected: [],
     distractorIdx: -1,
-    mathModifier: null // +1 or -1
+    mathModifier: null, // +1 or -1
+    keypadLabels: null
   });
 
   const [playerSeq, setPlayerSeq] = useState([]);
@@ -37,12 +45,7 @@ export default function useGameLogic() {
   const [systemMessage, setSystemMessage] = useState("SYSTEM STANDBY");
   const [seenRules, setSeenRules] = useState(new Set());
   const [isErrorState, setIsErrorState] = useState(false);
-
-  const updatePlayerName = (name) => {
-    const upperName = name.toUpperCase();
-    setPlayerName(upperName);
-    localStorage.setItem('pixelLogicPlayerName', upperName);
-  };
+  const [isMultiplayer, setIsMultiplayer] = useState(false);
 
   const getRotatedIndex = (idx, size) => {
     const r = Math.floor(idx / size);
@@ -68,53 +71,57 @@ export default function useGameLogic() {
       if (currentLevel >= 10) newSize = 5;
       seqLength = Math.min(currentLevel + 2, 8);
       
-      if (currentLevel >= 3) availableRules.push('distractor');
-      if (currentLevel >= 5) availableRules.push('mirror');
-      if (currentLevel >= 7) availableRules.push('reverse');
-      if (currentLevel >= 9) availableRules.push('rotate90');
-      if (currentLevel >= 11) availableRules.push('math');
-      if (currentLevel >= 13) availableRules.push('blind');
+      if (currentLevel >= 3) availableRules.push('keypad');
+      if (currentLevel >= 4) availableRules.push('keypad_random');
+      if (currentLevel >= 5) availableRules.push('distractor');
+      if (currentLevel >= 7) availableRules.push('mirror');
+      if (currentLevel >= 9) availableRules.push('reverse');
+      if (currentLevel >= 11) availableRules.push('rotate90');
+      if (currentLevel >= 13) availableRules.push('math');
+      if (currentLevel >= 15) availableRules.push('blind');
     } else if (diff === 'medium') {
       if (currentLevel >= 4) newSize = 4;
       if (currentLevel >= 8) newSize = 5;
       seqLength = Math.min(currentLevel + 2, 10);
       
       if (currentLevel >= 2) availableRules.push('distractor');
-      if (currentLevel >= 3) availableRules.push('mirror');
-      if (currentLevel >= 4) availableRules.push('reverse');
-      if (currentLevel >= 5) availableRules.push('rotate90');
-      if (currentLevel >= 6) availableRules.push('math');
-      if (currentLevel >= 7) availableRules.push('blind');
+      if (currentLevel >= 3) availableRules.push('keypad');
+      if (currentLevel >= 4) availableRules.push('keypad_random');
+      if (currentLevel >= 5) availableRules.push('mirror');
+      if (currentLevel >= 6) availableRules.push('reverse');
+      if (currentLevel >= 7) availableRules.push('rotate90');
+      if (currentLevel >= 8) availableRules.push('math');
+      if (currentLevel >= 9) availableRules.push('blind');
     } else if (diff === 'hard') {
       if (currentLevel >= 3) newSize = 4;
       if (currentLevel >= 6) newSize = 5;
       seqLength = Math.min(currentLevel + 3, 12);
       
-      availableRules = ['normal', 'distractor', 'mirror', 'reverse', 'rotate90', 'math', 'blind'];
+      availableRules = ['normal', 'distractor', 'mirror', 'reverse', 'rotate90', 'math', 'blind', 'keypad', 'keypad_random'];
     }
 
     let rule = 'normal';
     // For first level, always normal to ease them in, except on hard maybe? Even hard should give 1 level normal.
     if (currentLevel > 1) {
        // Pick a random unlocked rule, strongly biased towards newer rules
-       rule = availableRules[Math.floor(Math.random() * availableRules.length)];
+       rule = availableRules[Math.floor(seedRng() * availableRules.length)];
     }
 
     let mathModifier = null;
     if (rule === 'math') {
-       mathModifier = Math.random() > 0.5 ? 1 : -1;
+       mathModifier = seedRng() > 0.5 ? 1 : -1;
     }
 
     const newFlashes = [];
     for (let i = 0; i < seqLength; i++) {
-      newFlashes.push(Math.floor(Math.random() * (newSize * newSize)));
+      newFlashes.push(Math.floor(seedRng() * (newSize * newSize)));
     }
 
     let distractorIdx = -1;
     let expectedSeq = [];
 
     if (rule === 'distractor') {
-      distractorIdx = Math.floor(Math.random() * seqLength);
+      distractorIdx = Math.floor(seedRng() * seqLength);
       expectedSeq = newFlashes.filter((_, idx) => idx !== distractorIdx);
     } else if (rule === 'mirror') {
       expectedSeq = newFlashes.map(idx => getMirroredIndex(idx, newSize));
@@ -125,22 +132,49 @@ export default function useGameLogic() {
     } else if (rule === 'math') {
       expectedSeq = newFlashes.map(idx => getMathIndex(idx, newSize, mathModifier));
     } else {
-      // Normal or Blind
+      // Normal, Blind, or Keypad
       expectedSeq = [...newFlashes];
     }
 
-    return { size: newSize, rule, flashes: newFlashes, expected: expectedSeq, distractorIdx, mathModifier };
+    let keypadLabels = null;
+    if (rule === 'keypad' || rule === 'keypad_random') {
+      let baseMap = [];
+      if (newSize === 3) baseMap = ['1','2','3','4','5','6','7','8','9'];
+      else if (newSize === 4) baseMap = ['1','2','3','4','5','6','7','8','9','Q','W','E','R','T','Y','U'];
+      else if (newSize === 5) baseMap = ['1','2','3','4','5','6','7','8','9','Q','W','E','R','T','Y','U','I','O','P','A','S','D','F','G','H'];
+      
+      if (rule === 'keypad_random') {
+        const shuffled = [...baseMap];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+          const j = Math.floor(seedRng() * (i + 1));
+          [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        keypadLabels = shuffled;
+      } else {
+        keypadLabels = [...baseMap];
+      }
+    }
+
+    return { size: newSize, rule, flashes: newFlashes, expected: expectedSeq, distractorIdx, mathModifier, keypadLabels };
   }, []);
 
-  const startGame = (selectedDifficulty = 'medium') => {
+  const startGame = (selectedDifficulty = 'medium', isMp = false, customSeed = null, username = "GUEST") => {
     initAudio();
+    
+    if (customSeed) {
+      seedRng = mulberry32(customSeed);
+    } else {
+      seedRng = Math.random;
+    }
+    
+    setIsMultiplayer(isMp);
+    setPlayerName(username);
     setDifficulty(selectedDifficulty);
     setScore(0);
     setLives(3);
     setLevel(1);
     setHintCost(20);
     setSeenRules(new Set());
-    setIsNewPersonalBest(false);
     
     let saved = localStorage.getItem(`pixelLogicHighScore_${selectedDifficulty}`);
     if (!saved && selectedDifficulty === 'medium') {
@@ -211,6 +245,25 @@ export default function useGameLogic() {
     return () => { isCancelled = true; };
   }, [gameState, levelData, level, difficulty]);
 
+  useEffect(() => {
+    let interval = null;
+    if (gameState === 'frozen') {
+      interval = setInterval(() => {
+        setFreezeTimeLeft(prev => {
+          if (prev <= 1) {
+            clearInterval(interval);
+            setGameState('previewing');
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [gameState]);
+
   const handleTileClick = async (index) => {
     if (gameState !== 'playing') return;
 
@@ -244,25 +297,26 @@ export default function useGameLogic() {
       setSystemMessage(`ERROR: EXPECTED INDEX [${expectedTarget}], RECEIVED [${index}]`);
       
       if (newLives <= 0) {
-        setGameState('gameOver');
-        
-        // Check personal best
-        if (score > highScore) {
-          setHighScore(score);
-          setIsNewPersonalBest(true);
-          localStorage.setItem(`pixelLogicHighScore_${difficulty}`, score.toString());
+        if (isMultiplayer) {
+          setScore(s => Math.max(0, s - 500));
+          setLives(3);
+          setGameState('frozen'); // freeze
+          setSystemMessage("SYSTEM REBOOT INITIATED. PENALTY: 10 SECONDS.");
+          setFreezeTimeLeft(10);
+        } else {
+          setGameState('gameOver');
+          if (score > highScore) {
+            setHighScore(score);
+            localStorage.setItem(`pixelLogicHighScore_${difficulty}`, score.toString());
+          }
+          // Save to local history and attempt cloud sync
+          if (score > 0) {
+            const entry = saveScoreLocal(playerName, score, difficulty);
+            if (entry) syncScoreCloud(entry);
+          }
+          setSystemMessage("SYSTEM FAILURE. CONNECTION LOST.");
+          playGameOver();
         }
-        
-        // Submit to Firebase (async, non-blocking)
-        if (score > 0 && playerName) {
-          setIsSubmitting(true);
-          submitScore(playerName, score, level, difficulty).finally(() => {
-            setIsSubmitting(false);
-          });
-        }
-        
-        setSystemMessage("SYSTEM FAILURE. CONNECTION LOST.");
-        playGameOver();
       } else {
         setGameState('error');
         setTimeout(() => {
@@ -293,11 +347,9 @@ export default function useGameLogic() {
   };
 
   return {
-    gameState, level, lives, score, highScore, difficulty,
+    gameState, level, lives, score, highScore, difficulty, playerName,
     levelData, playerSeq, activeFlash, clickedTile,
-    systemMessage, isErrorState, hintCost,
-    playerName, isNewPersonalBest, isSubmitting,
-    startGame, handleTileClick, nextLevel, startFromTutorial, useHint,
-    updatePlayerName
+    systemMessage, isErrorState, hintCost, freezeTimeLeft,
+    startGame, handleTileClick, nextLevel, startFromTutorial, useHint
   };
 }

@@ -7,6 +7,11 @@ export default function TutorialModal({ rule, ruleInfo, onClose }) {
   const [clickedTile, setClickedTile] = useState(null);
   const [isInputPhase, setIsInputPhase] = useState(false);
 
+  const isKeyboardMode = rule === 'keypad' || rule === 'keypad_random';
+  const keypadLabels = isKeyboardMode 
+    ? (rule === 'keypad_random' ? ['5', '2', '9', '1', '7', '4', '8', '3', '6'] : ['1', '2', '3', '4', '5', '6', '7', '8', '9']) 
+    : null;
+
   useEffect(() => {
     let isCancelled = false;
 
@@ -67,6 +72,16 @@ export default function TutorialModal({ rule, ruleInfo, onClose }) {
             clicks: [8, 3, 7] // 0-1=-1->8, 4-1=3, 8-1=7
           };
         case 'blind':
+          return {
+            flashes: [
+              { index: 0, type: 'normal' },
+              { index: 4, type: 'normal' },
+              { index: 8, type: 'normal' }
+            ],
+            clicks: [0, 4, 8]
+          };
+        case 'keypad':
+        case 'keypad_random':
           return {
             flashes: [
               { index: 0, type: 'normal' },
@@ -197,26 +212,33 @@ export default function TutorialModal({ rule, ruleInfo, onClose }) {
                     key={index}
                     className={`rounded-lg transition-all duration-200 flex items-center justify-center text-xs font-mono text-theme-mid-soft ${tileStyle}`}
                   >
-                    {!isBlindMode && index}
+                    {!isBlindMode && (keypadLabels ? (
+                      <span className="text-lg font-bold text-theme-sand opacity-80">{keypadLabels[index]}</span>
+                    ) : index)}
                   </div>
                 );
               })}
 
-              {/* Fake Cursor */}
+              {/* Fake Cursor or Keyboard Key */}
               {cursorPos !== null && (
                 <div 
-                  className="absolute pointer-events-none transition-all duration-300 ease-out z-20"
-                  style={{
-                    // Math to place cursor at the center of the target tile
-                    // 3x3 grid, each tile is roughly 33.33% wide/high
+                  className={`absolute pointer-events-none transition-all ease-out z-20 ${isKeyboardMode ? 'inset-0 flex items-center justify-center duration-150' : 'duration-300'}`}
+                  style={isKeyboardMode ? {} : {
                     left: `${(cursorPos % 3) * 33.33 + 16}%`,
                     top: `${Math.floor(cursorPos / 3) * 33.33 + 16}%`,
                   }}
                 >
-                  <MousePointer2 
-                    className={`w-6 h-6 text-theme-dark drop-shadow-md transition-transform ${clickedTile !== null ? 'scale-75' : 'scale-100'}`} 
-                    fill="white"
-                  />
+                  {isKeyboardMode ? (
+                    <div className={`bg-theme-surface text-theme-dark font-mono font-bold text-3xl w-16 h-16 rounded-xl border-4 border-b-8 border-theme-mid shadow-[0_10px_20px_rgba(0,0,0,0.5)] flex flex-col items-center justify-center transition-all ${clickedTile !== null ? 'translate-y-2 border-b-4 scale-95 shadow-[0_2px_5px_rgba(0,0,0,0.5)]' : 'scale-100'}`}>
+                       <span className="text-[8px] text-theme-sand mb-0.5 font-sans font-black tracking-widest opacity-80 uppercase leading-none">PRESS</span>
+                       {keypadLabels[cursorPos]}
+                    </div>
+                  ) : (
+                    <MousePointer2 
+                      className={`w-6 h-6 text-theme-dark drop-shadow-md transition-transform ${clickedTile !== null ? 'scale-75' : 'scale-100'}`} 
+                      fill="white"
+                    />
+                  )}
                 </div>
               )}
             </div>

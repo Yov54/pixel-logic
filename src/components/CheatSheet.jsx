@@ -1,4 +1,4 @@
-import { X, BookOpen, AlertOctagon, RefreshCw, RotateCcw, Zap, Terminal, Redo, EyeOff, Calculator } from "lucide-react";
+import { X, BookOpen, AlertOctagon, RefreshCw, RotateCcw, Zap, Terminal, Redo, EyeOff, Calculator, Keyboard } from "lucide-react";
 
 export default function CheatSheet({ isOpen, onClose, onSelectRule }) {
   if (!isOpen) return null;
@@ -157,6 +157,38 @@ export default function CheatSheet({ isOpen, onClose, onSelectRule }) {
                   <h4 className="font-bold text-theme-dark font-mono text-base sm:text-lg uppercase group-hover:text-theme-accent transition-colors">Blind Mode</h4>
                   <p className="text-sm mt-1 leading-relaxed opacity-90 text-justify">
                     Visual interface goes offline during the input phase. The grid borders and hover effects disappear. Rely purely on your spatial memory to click the correct empty void.
+                  </p>
+                </div>
+              </button>
+
+              {/* Keypad Protocol */}
+              <button 
+                onClick={() => onSelectRule('keypad')}
+                className="w-full text-left flex gap-4 sm:gap-6 items-start bg-white/50 p-4 rounded-xl border border-theme-sand/30 shadow-sm hover:bg-white hover:shadow-md hover:-translate-y-1 hover:border-theme-accent transition-all cursor-pointer group"
+              >
+                <div className="mt-1 bg-theme-dark-soft p-2 rounded-lg shrink-0 group-hover:bg-theme-accent transition-colors">
+                  <Keyboard className="w-6 h-6 text-theme-sand group-hover:text-white transition-colors" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-theme-dark font-mono text-base sm:text-lg uppercase group-hover:text-theme-accent transition-colors">Keypad Protocol</h4>
+                  <p className="text-sm mt-1 leading-relaxed opacity-90 text-justify">
+                    Mouse clicks are disabled. The grid will display a sequence of keys. You must use your physical keyboard to press the corresponding key shown on the flashing tile.
+                  </p>
+                </div>
+              </button>
+
+              {/* Scrambled Keypad */}
+              <button 
+                onClick={() => onSelectRule('keypad_random')}
+                className="w-full text-left flex gap-4 sm:gap-6 items-start bg-white/50 p-4 rounded-xl border border-theme-sand/30 shadow-sm hover:bg-white hover:shadow-md hover:-translate-y-1 hover:border-theme-accent transition-all cursor-pointer group"
+              >
+                <div className="mt-1 bg-theme-dark-soft p-2 rounded-lg shrink-0 group-hover:bg-theme-accent transition-colors">
+                  <Keyboard className="w-6 h-6 text-theme-sand group-hover:text-white transition-colors" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-theme-dark font-mono text-base sm:text-lg uppercase group-hover:text-theme-accent transition-colors">Scrambled Keypad</h4>
+                  <p className="text-sm mt-1 leading-relaxed opacity-90 text-justify">
+                    Similar to Keypad Protocol, but the key mappings on the grid are randomized. You must quickly locate the correct key corresponding to the flashing tile and press it on your keyboard.
                   </p>
                 </div>
               </button>

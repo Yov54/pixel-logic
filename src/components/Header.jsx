@@ -1,6 +1,6 @@
-import { Heart, Cpu, Pause } from "lucide-react";
+import { Heart, Cpu, Pause, Settings } from "lucide-react";
 
-export default function Header({ lives, score, highScore, onPause }) {
+export default function Header({ lives, score, highScore, onPause, isMultiplayer, openSettings }) {
   return (
     <header className="w-full max-w-5xl flex flex-col sm:flex-row justify-between items-center mb-2 md:mb-4 border-b border-theme pb-2 sm:pb-4 gap-2 flex-shrink-0">
       <div className="flex items-center gap-3">
@@ -13,14 +13,23 @@ export default function Header({ lives, score, highScore, onPause }) {
             Syntax Training Simulator
           </p>
         </div>
-        
-        <button 
-          onClick={onPause}
-          className="ml-2 sm:ml-4 p-1.5 sm:p-2 rounded-full bg-theme-surface border border-theme shadow-sm hover:bg-theme-sand-soft transition-colors text-theme-mid hover:text-theme-accent"
-          title="Pause Game"
-        >
-          <Pause className="w-4 h-4" />
-        </button>
+        {isMultiplayer ? (
+          <button 
+            onClick={openSettings}
+            className="ml-2 sm:ml-4 p-1.5 sm:p-2 rounded-full bg-theme-surface border border-theme shadow-sm hover:bg-theme-sand-soft transition-colors text-theme-mid hover:text-theme-accent"
+            title="Settings"
+          >
+            <Settings className="w-4 h-4" />
+          </button>
+        ) : (
+          <button 
+            onClick={onPause}
+            className="ml-2 sm:ml-4 p-1.5 sm:p-2 rounded-full bg-theme-surface border border-theme shadow-sm hover:bg-theme-sand-soft transition-colors text-theme-mid hover:text-theme-accent"
+            title="Pause Game"
+          >
+            <Pause className="w-4 h-4" />
+          </button>
+        )}
       </div>
 
       <div className="flex items-center gap-4 text-xs sm:text-sm font-mono bg-theme-surface px-4 py-2 sm:px-6 sm:py-3 rounded-xl border border-theme shadow-inner">

@@ -43,15 +43,21 @@ export default function GameGrid({
           <button
             key={index}
             disabled={gameState !== 'playing'}
-            onClick={() => handleTileClick(index)}
+            onClick={() => {
+              if (!levelData.keypadLabels) handleTileClick(index);
+            }}
             className={`
               w-full h-full rounded-xl border transition-all duration-150 
               flex items-center justify-center font-mono text-xs text-theme-mid-soft
-              ${gameState === 'playing' && !isClicked && !isFlashing && !isBlind ? 'hover:bg-theme-dark-soft cursor-pointer active:scale-95' : 'cursor-default'}
+              ${gameState === 'playing' && !isClicked && !isFlashing && !isBlind && !levelData.keypadLabels ? 'hover:bg-theme-dark-soft cursor-pointer active:scale-95' : 'cursor-default'}
               ${tileStyle}
             `}
           >
-            {!isBlind && index}
+            {!isBlind && (
+              <span className={levelData.keypadLabels ? 'text-lg sm:text-2xl font-bold text-theme-sand opacity-80' : ''}>
+                {levelData.keypadLabels ? levelData.keypadLabels[index] : index}
+              </span>
+            )}
           </button>
         );
       })}
