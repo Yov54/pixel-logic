@@ -171,7 +171,7 @@ export default function StartScreen({ onStartSolo, onHost, onJoin, openSettings,
 
                 {/* --- SOLO / HOST DIFFICULTY SELECTION --- */}
                 {(view === 'solo' || view === 'host') && (
-                  <div className={`flex flex-col items-center lg:items-start w-full animate-in fade-in slide-in-from-right-8 duration-500 ${view === 'host' ? 'gap-2 sm:gap-3 lg:-mt-6' : 'gap-3 sm:gap-5'}`}>
+                  <div className="flex flex-col items-center lg:items-start w-full animate-in fade-in slide-in-from-right-8 duration-500 gap-2 sm:gap-3 lg:-mt-6">
                     <p className="text-[#F3E9DC] text-xs sm:text-sm font-bold tracking-[0.2em] drop-shadow-[0_0_8px_rgba(243,233,220,0.5)]">
                       {view === 'solo' ? 'SELECT DIFFICULTY' : 'ROOM SETTINGS'}
                     </p>
@@ -217,7 +217,7 @@ export default function StartScreen({ onStartSolo, onHost, onJoin, openSettings,
                            type="text" 
                            value={soloUsername}
                            onChange={(e) => setSoloUsername(e.target.value.toUpperCase())}
-                           maxLength={12}
+                           maxLength={10}
                            placeholder="ENTER NAME..."
                            className="w-full bg-theme-dark-soft border-2 border-theme-mid p-2 sm:p-3 rounded text-[#F3E9DC] font-mono font-bold tracking-wider uppercase focus:outline-none focus:border-theme-accent"
                          />
