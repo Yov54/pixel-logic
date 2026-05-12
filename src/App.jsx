@@ -8,6 +8,7 @@ import CheatSheet from "./components/CheatSheet";
 import GameBoard from "./components/GameBoard";
 import AdminPanel from "./components/AdminPanel";
 import StudentLobby from "./components/StudentLobby";
+import LeaderboardModal from "./components/LeaderboardModal";
 import useGameLogic from "./hooks/useGameLogic";
 
 import { AlertOctagon, RefreshCw, RotateCcw, Zap, EyeOff, Calculator, Keyboard, Redo } from "lucide-react";
@@ -24,6 +25,7 @@ export default function App() {
   const [previewRule, setPreviewRule] = useState(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isPauseOpen, setIsPauseOpen] = useState(false);
+  const [isLeaderboardOpen, setIsLeaderboardOpen] = useState(false);
 
   useEffect(() => {
     initAudio();
@@ -155,6 +157,8 @@ export default function App() {
       />
 
       <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
+      
+      <LeaderboardModal isOpen={isLeaderboardOpen} onClose={() => setIsLeaderboardOpen(false)} />
 
       <PauseModal
         isOpen={isPauseOpen}
@@ -186,6 +190,7 @@ export default function App() {
           }}
           openSettings={() => setIsSettingsOpen(true)}
           openManual={() => setCheatSheetOpen(true)}
+          openLeaderboard={() => setIsLeaderboardOpen(true)}
         />
       )}
 

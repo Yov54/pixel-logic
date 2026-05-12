@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Heart, Settings, BookOpen, ChevronLeft } from "lucide-react";
+import { Heart, Settings, BookOpen, ChevronLeft, Trophy } from "lucide-react";
 const DIFFICULTY_INFO = {
   easy: {
     desc: "TRAINING MODE. Rules unlock gradually.",
@@ -30,7 +30,7 @@ const DIFFICULTY_INFO = {
   }
 };
 
-export default function StartScreen({ onStartSolo, onHost, onJoin, openSettings, openManual }) {
+export default function StartScreen({ onStartSolo, onHost, onJoin, openSettings, openManual, openLeaderboard }) {
   const [highScore, setHighScore] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [view, setView] = useState('mode'); // 'mode', 'solo', 'host', 'join'
@@ -315,6 +315,19 @@ export default function StartScreen({ onStartSolo, onHost, onJoin, openSettings,
                 className="w-10 h-10 sm:w-12 sm:h-12 bg-theme-dark rounded-full flex items-center justify-center border-2 border-theme-mid shadow-[0_0_15px_rgba(44,24,20,0.8)] hover:bg-theme-mid hover:text-white transition-all hover:scale-110 active:scale-95 z-30 cursor-pointer relative"
               >
                 <BookOpen className="w-4 h-4 sm:w-5 sm:h-5" />
+              </button>
+            </div>
+
+            {/* LEADERBOARD */}
+            <div className="relative group flex items-center justify-center">
+              <div className="absolute bottom-full mb-3 px-3 py-1.5 bg-theme-dark-solid text-theme-light text-xs font-mono font-bold tracking-widest rounded border border-theme-accent whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none drop-shadow-[0_0_5px_rgba(192,133,82,0.3)]">
+                LEADERBOARD
+              </div>
+              <button
+                onClick={(e) => { e.stopPropagation(); openLeaderboard(); }}
+                className="w-10 h-10 sm:w-12 sm:h-12 bg-theme-dark rounded-full flex items-center justify-center border-2 border-theme-mid shadow-[0_0_15px_rgba(44,24,20,0.8)] hover:bg-theme-mid hover:text-white transition-all hover:scale-110 active:scale-95 z-30 cursor-pointer relative"
+              >
+                <Trophy className="w-4 h-4 sm:w-5 sm:h-5 text-theme-accent" />
               </button>
             </div>
 
