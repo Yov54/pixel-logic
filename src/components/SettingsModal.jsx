@@ -28,7 +28,7 @@ export default function SettingsModal({ isOpen, onClose }) {
       <button 
         onClick={() => handleToggle(stateKey)}
         className={`relative w-12 h-6 rounded-full transition-colors duration-300 ${
-          settings[stateKey] ? 'bg-theme-accent' : 'bg-theme-dark-soft opacity-50'
+          settings[stateKey] ? 'bg-theme-accent' : 'bg-theme-mid/40'
         }`}
       >
         <div className={`absolute top-1 left-1 w-4 h-4 bg-theme-light rounded-full transition-transform duration-300 ${
