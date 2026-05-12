@@ -107,8 +107,8 @@ export default function StartScreen({ onStartSolo, onHost, onJoin, openSettings,
           {/* --- CONTENT LAYER --- */}
           <div className="relative z-20 flex-1 flex flex-col p-4 sm:p-8 md:p-12 justify-between">
 
-            {/* Top Bar: Hi-score & Hearts (Only show in solo or mode view) */}
-            <div className={`flex justify-between items-start font-mono text-theme-sand shrink-0 transition-opacity ${view === 'mode' || view === 'solo' ? 'opacity-100' : 'opacity-0'}`}>
+            {/* Top Bar: Hi-score & Hearts (Only show in solo view) */}
+            <div className={`flex justify-between items-start font-mono text-theme-sand shrink-0 transition-opacity ${view === 'solo' ? 'opacity-100' : 'opacity-0'}`}>
               <div>
                 <p className="font-bold text-sm sm:text-lg tracking-widest uppercase flex items-center gap-2">
                   HI-SCORE <span className="text-[0.6em] text-theme-accent opacity-80">[{selectedDifficulty}]</span>
