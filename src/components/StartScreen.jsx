@@ -171,7 +171,7 @@ export default function StartScreen({ onStartSolo, onHost, onJoin, openSettings,
 
                 {/* --- SOLO / HOST DIFFICULTY SELECTION --- */}
                 {(view === 'solo' || view === 'host') && (
-                  <div className={`flex flex-col items-center lg:items-start w-full animate-in fade-in slide-in-from-right-8 duration-500 ${view === 'solo' ? 'gap-1.5 sm:gap-2 lg:-mt-12' : 'gap-2 sm:gap-3 lg:-mt-6'}`}>
+                  <div className={`flex flex-col items-center lg:items-start w-full animate-in fade-in slide-in-from-right-8 duration-500 ${view === 'solo' ? 'gap-1.5 sm:gap-2 lg:-mt-6' : 'gap-2 sm:gap-3 lg:-mt-6'}`}>
                     <p className="text-[#F3E9DC] text-xs sm:text-sm font-bold tracking-[0.2em] drop-shadow-[0_0_8px_rgba(243,233,220,0.5)]">
                       {view === 'solo' ? 'SELECT DIFFICULTY' : 'ROOM SETTINGS'}
                     </p>
