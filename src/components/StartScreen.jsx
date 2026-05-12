@@ -34,7 +34,7 @@ export default function StartScreen({ onStartSolo, onHost, onJoin, openSettings,
   const [highScore, setHighScore] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [view, setView] = useState('mode'); // 'mode', 'solo', 'host', 'join'
-  
+
   const [selectedDifficulty, setSelectedDifficulty] = useState('medium');
   const [hostTimeLimit, setHostTimeLimit] = useState(3);
   const [joinUsername, setJoinUsername] = useState('');
@@ -134,10 +134,10 @@ export default function StartScreen({ onStartSolo, onHost, onJoin, openSettings,
 
               {/* Right Side: Dynamic Menus */}
               <div className="flex-1 flex flex-col items-center lg:items-start gap-3 sm:gap-5 font-mono text-theme-sand w-full lg:pl-6 relative min-h-[300px]">
-                
+
                 {/* BACK BUTTON for non-mode views */}
                 {view !== 'mode' && (
-                  <button 
+                  <button
                     onClick={() => setView('mode')}
                     className="absolute -top-10 lg:-top-12 left-0 flex items-center gap-1 text-theme-sand hover:text-white transition-colors"
                   >
@@ -182,8 +182,8 @@ export default function StartScreen({ onStartSolo, onHost, onJoin, openSettings,
                           key={diff}
                           onClick={() => setSelectedDifficulty(diff)}
                           className={`group flex items-center justify-center gap-2 transition-all cursor-pointer relative ${selectedDifficulty === diff
-                              ? 'text-theme-accent drop-shadow-[0_0_10px_rgba(192,133,82,0.8)]'
-                              : 'text-theme-sand hover:text-[#F3E9DC]'
+                            ? 'text-theme-accent drop-shadow-[0_0_10px_rgba(192,133,82,0.8)]'
+                            : 'text-theme-sand hover:text-[#F3E9DC]'
                             }`}
                         >
                           <span className={`absolute left-[-1rem] transition-opacity ${selectedDifficulty === diff ? 'opacity-100 text-theme-accent' : 'opacity-0 group-hover:opacity-50 text-theme-sand'}`}>▶</span>
@@ -195,32 +195,32 @@ export default function StartScreen({ onStartSolo, onHost, onJoin, openSettings,
 
                     {view === 'host' && (
                       <div className="w-full mt-1 mb-1 lg:mt-0 lg:mb-0">
-                         <p className="text-[#F3E9DC] text-[10px] sm:text-xs font-bold tracking-[0.2em] mb-1.5">TIME LIMIT</p>
-                         <div className="flex gap-2 sm:gap-4">
-                           {[1, 3, 5].map(time => (
-                             <button
-                               key={time}
-                               onClick={() => setHostTimeLimit(time)}
-                               className={`px-3 py-1 sm:px-4 sm:py-1.5 border rounded font-bold text-xs sm:text-sm ${hostTimeLimit === time ? 'bg-theme-accent text-theme-dark border-theme-accent' : 'border-theme text-theme-sand hover:bg-theme-dark-soft'}`}
-                             >
-                               {time} MIN
-                             </button>
-                           ))}
-                         </div>
+                        <p className="text-[#F3E9DC] text-[10px] sm:text-xs font-bold tracking-[0.2em] mb-1.5">TIME LIMIT</p>
+                        <div className="flex gap-2 sm:gap-4">
+                          {[1, 3, 5].map(time => (
+                            <button
+                              key={time}
+                              onClick={() => setHostTimeLimit(time)}
+                              className={`px-3 py-1 sm:px-4 sm:py-1.5 border rounded font-bold text-xs sm:text-sm ${hostTimeLimit === time ? 'bg-theme-accent text-theme-dark border-theme-accent' : 'border-theme text-theme-sand hover:bg-theme-dark-soft'}`}
+                            >
+                              {time} MIN
+                            </button>
+                          ))}
+                        </div>
                       </div>
                     )}
 
                     {view === 'solo' && (
                       <div className="w-full mt-1 lg:mt-0">
-                         <p className="text-[#F3E9DC] text-[10px] sm:text-xs font-bold tracking-[0.2em] mb-1 uppercase">PLAYER NAME</p>
-                         <input 
-                           type="text" 
-                           value={soloUsername}
-                           onChange={(e) => setSoloUsername(e.target.value.toUpperCase())}
-                           maxLength={10}
-                           placeholder="ENTER NAME..."
-                           className="w-full bg-theme-dark-soft border-2 border-theme-mid p-1.5 sm:p-2 rounded text-[#F3E9DC] font-mono font-bold tracking-wider uppercase focus:outline-none focus:border-theme-accent"
-                         />
+                        <p className="text-[#F3E9DC] text-[10px] sm:text-xs font-bold tracking-[0.2em] mb-1 uppercase">PLAYER NAME</p>
+                        <input
+                          type="text"
+                          value={soloUsername}
+                          onChange={(e) => setSoloUsername(e.target.value.toUpperCase())}
+                          maxLength={10}
+                          placeholder="ENTER NAME..."
+                          className="w-full bg-theme-dark-soft border-2 border-theme-mid p-1.5 sm:p-2 rounded text-[#F3E9DC] font-mono font-bold tracking-wider uppercase focus:outline-none focus:border-theme-accent"
+                        />
                       </div>
                     )}
 
@@ -264,11 +264,11 @@ export default function StartScreen({ onStartSolo, onHost, onJoin, openSettings,
                     <p className="text-[#F3E9DC] text-xs sm:text-sm font-bold tracking-[0.2em] drop-shadow-[0_0_8px_rgba(243,233,220,0.5)]">
                       JOIN BATTLE
                     </p>
-                    
+
                     <div className="flex flex-col gap-2">
                       <label className="text-[10px] text-theme-sand font-bold tracking-widest uppercase">Student Name</label>
-                      <input 
-                        type="text" 
+                      <input
+                        type="text"
                         value={joinUsername}
                         onChange={(e) => setJoinUsername(e.target.value.toUpperCase())}
                         maxLength={12}
@@ -279,8 +279,8 @@ export default function StartScreen({ onStartSolo, onHost, onJoin, openSettings,
 
                     <div className="flex flex-col gap-2">
                       <label className="text-[10px] text-theme-sand font-bold tracking-widest uppercase">Room Code</label>
-                      <input 
-                        type="text" 
+                      <input
+                        type="text"
                         value={joinRoomCode}
                         onChange={(e) => setJoinRoomCode(e.target.value.toUpperCase())}
                         maxLength={8}
