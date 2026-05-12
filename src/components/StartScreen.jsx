@@ -171,7 +171,7 @@ export default function StartScreen({ onStartSolo, onHost, onJoin, openSettings,
 
                 {/* --- SOLO / HOST DIFFICULTY SELECTION --- */}
                 {(view === 'solo' || view === 'host') && (
-                  <div className="flex flex-col items-center lg:items-start w-full animate-in fade-in slide-in-from-right-8 duration-500 gap-2 sm:gap-3 lg:-mt-6">
+                  <div className={`flex flex-col items-center lg:items-start w-full animate-in fade-in slide-in-from-right-8 duration-500 ${view === 'solo' ? 'gap-1.5 sm:gap-2 lg:-mt-12' : 'gap-2 sm:gap-3 lg:-mt-6'}`}>
                     <p className="text-[#F3E9DC] text-xs sm:text-sm font-bold tracking-[0.2em] drop-shadow-[0_0_8px_rgba(243,233,220,0.5)]">
                       {view === 'solo' ? 'SELECT DIFFICULTY' : 'ROOM SETTINGS'}
                     </p>
@@ -211,25 +211,25 @@ export default function StartScreen({ onStartSolo, onHost, onJoin, openSettings,
                     )}
 
                     {view === 'solo' && (
-                      <div className="w-full mt-1 mb-1 lg:mt-0 lg:mb-0">
-                         <p className="text-[#F3E9DC] text-[10px] sm:text-xs font-bold tracking-[0.2em] mb-1.5 uppercase">PLAYER NAME</p>
+                      <div className="w-full mt-1 lg:mt-0">
+                         <p className="text-[#F3E9DC] text-[10px] sm:text-xs font-bold tracking-[0.2em] mb-1 uppercase">PLAYER NAME</p>
                          <input 
                            type="text" 
                            value={soloUsername}
                            onChange={(e) => setSoloUsername(e.target.value.toUpperCase())}
                            maxLength={10}
                            placeholder="ENTER NAME..."
-                           className="w-full bg-theme-dark-soft border-2 border-theme-mid p-2 sm:p-3 rounded text-[#F3E9DC] font-mono font-bold tracking-wider uppercase focus:outline-none focus:border-theme-accent"
+                           className="w-full bg-theme-dark-soft border-2 border-theme-mid p-1.5 sm:p-2 rounded text-[#F3E9DC] font-mono font-bold tracking-wider uppercase focus:outline-none focus:border-theme-accent"
                          />
                       </div>
                     )}
 
                     {/* INFO PANEL */}
-                    <div className={`w-full max-w-[20rem] sm:max-w-sm bg-theme-dark-soft border border-theme rounded flex flex-col text-left animate-in fade-in zoom-in duration-300 ${view === 'host' ? 'p-2 sm:p-3 gap-1.5 sm:gap-2' : 'p-3 sm:p-4 gap-2 sm:gap-3'}`} key={selectedDifficulty}>
-                      <p className="text-[#F3E9DC] text-[10px] sm:text-xs font-bold text-center border-b border-theme pb-1.5 sm:pb-2 mb-1 tracking-widest uppercase">
+                    <div className={`w-full max-w-[20rem] sm:max-w-sm bg-theme-dark-soft border border-theme rounded flex flex-col text-left animate-in fade-in zoom-in duration-300 ${view === 'solo' ? 'p-2 sm:p-3 gap-1.5' : view === 'host' ? 'p-2 sm:p-3 gap-1.5 sm:gap-2' : 'p-3 sm:p-4 gap-2 sm:gap-3'}`} key={selectedDifficulty}>
+                      <p className="text-[#F3E9DC] text-[10px] sm:text-xs font-bold text-center border-b border-theme pb-1 mb-1 tracking-widest uppercase">
                         {DIFFICULTY_INFO[selectedDifficulty].desc}
                       </p>
-                      <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 sm:gap-y-2 text-[9px] sm:text-[11px] md:text-xs">
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-1 sm:gap-y-1.5 text-[9px] sm:text-[11px] md:text-xs">
                         <div className="flex justify-between">
                           <span className="text-theme-sand opacity-70">LIVES</span>
                           <span className="text-theme-accent font-bold text-xs sm:text-sm -mt-0.5">{view === 'host' ? 'RESPAWN PENALTY' : "❤".repeat(DIFFICULTY_INFO[selectedDifficulty].lives)}</span>
@@ -246,7 +246,7 @@ export default function StartScreen({ onStartSolo, onHost, onJoin, openSettings,
                     </div>
 
                     {/* START Button */}
-                    <div className={`w-full max-w-[20rem] sm:max-w-sm flex justify-center lg:justify-start ${view === 'host' ? 'mt-0 sm:mt-1' : 'mt-1 sm:mt-2'}`}>
+                    <div className={`w-full max-w-[20rem] sm:max-w-sm flex justify-center lg:justify-start ${view === 'host' ? 'mt-0 sm:mt-1' : 'mt-0.5 sm:mt-1'}`}>
                       <button
                         onClick={view === 'solo' ? handleStartSolo : handleHost}
                         disabled={view === 'solo' && !soloUsername.trim()}
