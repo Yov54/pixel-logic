@@ -7,6 +7,7 @@ import { BookOpen } from "lucide-react";
 export default function GameBoard({ 
   game, 
   ruleInfo, 
+  getRuleDescription,
   showHelpTooltip, 
   setShowHelpTooltip, 
   setManualTutorialOpen, 
@@ -36,11 +37,20 @@ export default function GameBoard({
 
           {/* LEVEL INFO */}
           <div className="flex w-full justify-between items-center mb-4 px-2 shrink-0">
-            <h2 className="text-lg font-mono text-theme-dark">
-              LEVEL <span className="text-theme-accent">{game.level}</span>
-              <span className="ml-2 text-xs text-theme-mid">
+            <h2 className="text-lg font-mono text-theme-dark flex items-center flex-wrap gap-2">
+              <span>LEVEL <span className="text-theme-accent">{game.level}</span></span>
+              <span className="text-xs text-theme-mid">
                 [{game.levelData.size}x{game.levelData.size} GRID]
               </span>
+              {!isMultiplayer && (
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${
+                  game.difficulty === 'hard' ? 'border-red-500/50 text-red-600 bg-red-100' :
+                  game.difficulty === 'medium' ? 'border-orange-500/50 text-orange-600 bg-orange-100' :
+                  'border-green-500/50 text-green-600 bg-green-100'
+                }`}>
+                  MODE: {game.difficulty.toUpperCase()}
+                </span>
+              )}
             </h2>
 
             <div className={`text-xs font-mono px-3 py-1 rounded-full border ${game.gameState === 'playing'
@@ -68,13 +78,16 @@ export default function GameBoard({
           {/* OVERLAY */}
           <Overlays
             gameState={game.gameState}
-            startGame={game.startGame}
+            startGame={game.restartGame}
             nextLevel={game.nextLevel}
             score={game.score}
             difficulty={game.difficulty}
             highScore={game.highScore}
             freezeTimeLeft={game.freezeTimeLeft}
             backToMenu={backToMenu}
+            modifierOptions={game.modifierOptions}
+            selectModifier={game.selectModifier}
+            getRuleDescription={getRuleDescription}
           />
         </div>
 

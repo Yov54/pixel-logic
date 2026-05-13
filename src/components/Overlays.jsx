@@ -10,7 +10,10 @@ export default function Overlays({
   difficulty = 'medium',
   highScore = 0,
   freezeTimeLeft = 0,
-  backToMenu = () => {}
+  backToMenu = () => {},
+  modifierOptions = [],
+  selectModifier = () => {},
+  getRuleDescription = null
 }) {
   const [gameOverPhase, setGameOverPhase] = useState(0);
   const [restartCountdown, setRestartCountdown] = useState(3);
@@ -71,6 +74,43 @@ export default function Overlays({
           >
             COMPILE NEXT STAGE
           </button>
+        </div>
+      )}
+
+      {gameState === "choosingModifier" && modifierOptions.length > 0 && getRuleDescription && (
+        <div className="absolute inset-0 bg-theme-dark/95 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center z-30 animate-in fade-in zoom-in duration-300 p-4 sm:p-6 overflow-hidden">
+          <div className="text-center mb-6 shrink-0 mt-4">
+            <h3 className="text-2xl sm:text-3xl font-black text-theme-accent tracking-widest uppercase mb-1 drop-shadow-[0_0_10px_rgba(192,133,82,0.8)]">
+              SYSTEM OVERRIDE
+            </h3>
+            <p className="text-theme-sand font-mono text-xs sm:text-sm tracking-widest opacity-80">
+              SELECT NEXT PROTOCOL
+            </p>
+          </div>
+          
+          <div className="flex flex-col sm:flex-row gap-4 w-full max-w-2xl justify-center items-stretch overflow-y-auto pb-4 custom-scrollbar px-2">
+            {modifierOptions.map(opt => {
+              const info = getRuleDescription(opt);
+              return (
+                <button
+                  key={opt}
+                  onClick={() => selectModifier(opt)}
+                  className="flex-1 flex flex-col items-center justify-start text-center bg-black/40 hover:bg-black/60 border-2 border-theme-mid/50 hover:border-theme-accent rounded-xl p-4 sm:p-6 transition-all group active:scale-95 shadow-[0_4px_15px_rgba(0,0,0,0.5)] hover:shadow-[0_0_20px_rgba(192,133,82,0.4)] relative overflow-hidden"
+                >
+                  <div className="absolute inset-0 bg-theme-accent/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-theme-light border border-theme flex items-center justify-center mb-3 sm:mb-4 group-hover:scale-110 group-hover:border-theme-accent transition-all relative z-10 shadow-inner drop-shadow-md">
+                    {info.icon}
+                  </div>
+                  <h4 className="text-sm sm:text-base font-black text-theme-light tracking-wider mb-2 relative z-10 uppercase drop-shadow-md">
+                    {info.title}
+                  </h4>
+                  <p className="text-xs text-theme-sand opacity-90 font-mono leading-relaxed relative z-10">
+                    {info.desc}
+                  </p>
+                </button>
+              );
+            })}
+          </div>
         </div>
       )}
 

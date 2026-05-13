@@ -46,6 +46,7 @@ export default function useGameLogic() {
   const [seenRules, setSeenRules] = useState(new Set());
   const [isErrorState, setIsErrorState] = useState(false);
   const [isMultiplayer, setIsMultiplayer] = useState(false);
+  const [modifierOptions, setModifierOptions] = useState([]);
 
   const getRotatedIndex = (idx, size) => {
     const r = Math.floor(idx / size);
@@ -60,52 +61,68 @@ export default function useGameLogic() {
     return (idx + modifier + total) % total;
   };
 
-  const generateLevel = useCallback((currentLevel, diff) => {
+  const getRuleForLevel = useCallback((currentLevel, diff) => {
+    const TIERS = {
+      low: ['distractor', 'keypad'],
+      mid: ['mirror', 'reverse', 'keypad_random'],
+      top: ['rotate90', 'math', 'blind']
+    };
+
+    let pNormal = 0, pLow = 0, pMid = 0, pTop = 0;
+
+    if (diff === 'easy') {
+      if (currentLevel < 3) pNormal = 100;
+      else if (currentLevel === 3) pLow = 100;
+      else if (currentLevel <= 6) { pNormal = 15; pLow = 85; }
+      else if (currentLevel <= 10) { pNormal = 10; pLow = 50; pMid = 40; }
+      else { pNormal = 5; pLow = 35; pMid = 40; pTop = 20; }
+    } else if (diff === 'medium') {
+      if (currentLevel < 2) pNormal = 100;
+      else if (currentLevel === 2) pLow = 100;
+      else if (currentLevel <= 5) { pNormal = 10; pLow = 50; pMid = 40; }
+      else if (currentLevel <= 9) { pNormal = 5; pLow = 35; pMid = 40; pTop = 20; }
+      else { pNormal = 2; pLow = 18; pMid = 40; pTop = 40; }
+    } else { // hard
+      if (currentLevel < 2) pNormal = 100;
+      else if (currentLevel === 2) { pLow = 30; pMid = 40; pTop = 30; }
+      else if (currentLevel <= 5) { pNormal = 5; pLow = 25; pMid = 40; pTop = 30; }
+      else if (currentLevel <= 8) { pNormal = 2; pLow = 18; pMid = 30; pTop = 50; }
+      else { pNormal = 1; pLow = 9; pMid = 20; pTop = 70; }
+    }
+
+    const roll = seedRng() * 100;
+    let selectedTier = 'normal';
+    if (roll < pNormal) selectedTier = 'normal';
+    else if (roll < pNormal + pLow) selectedTier = 'low';
+    else if (roll < pNormal + pLow + pMid) selectedTier = 'mid';
+    else selectedTier = 'top';
+
+    if (selectedTier === 'normal') return 'normal';
+    
+    const pool = TIERS[selectedTier];
+    return pool[Math.floor(seedRng() * pool.length)];
+  }, []);
+
+  const generateLevel = useCallback((currentLevel, diff, forcedRule = null) => {
     let newSize = 3;
     let seqLength = 3;
-    let availableRules = ['normal'];
     
     // Scale properties based on difficulty
     if (diff === 'easy') {
       if (currentLevel >= 5) newSize = 4;
       if (currentLevel >= 10) newSize = 5;
       seqLength = Math.min(currentLevel + 2, 8);
-      
-      if (currentLevel >= 3) availableRules.push('keypad');
-      if (currentLevel >= 4) availableRules.push('keypad_random');
-      if (currentLevel >= 5) availableRules.push('distractor');
-      if (currentLevel >= 7) availableRules.push('mirror');
-      if (currentLevel >= 9) availableRules.push('reverse');
-      if (currentLevel >= 11) availableRules.push('rotate90');
-      if (currentLevel >= 13) availableRules.push('math');
-      if (currentLevel >= 15) availableRules.push('blind');
     } else if (diff === 'medium') {
       if (currentLevel >= 4) newSize = 4;
       if (currentLevel >= 8) newSize = 5;
       seqLength = Math.min(currentLevel + 2, 10);
-      
-      if (currentLevel >= 2) availableRules.push('distractor');
-      if (currentLevel >= 3) availableRules.push('keypad');
-      if (currentLevel >= 4) availableRules.push('keypad_random');
-      if (currentLevel >= 5) availableRules.push('mirror');
-      if (currentLevel >= 6) availableRules.push('reverse');
-      if (currentLevel >= 7) availableRules.push('rotate90');
-      if (currentLevel >= 8) availableRules.push('math');
-      if (currentLevel >= 9) availableRules.push('blind');
     } else if (diff === 'hard') {
       if (currentLevel >= 3) newSize = 4;
       if (currentLevel >= 6) newSize = 5;
       seqLength = Math.min(currentLevel + 3, 12);
-      
-      availableRules = ['normal', 'distractor', 'mirror', 'reverse', 'rotate90', 'math', 'blind', 'keypad', 'keypad_random'];
     }
 
-    let rule = 'normal';
-    // For first level, always normal to ease them in, except on hard maybe? Even hard should give 1 level normal.
-    if (currentLevel > 1) {
-       // Pick a random unlocked rule, strongly biased towards newer rules
-       rule = availableRules[Math.floor(seedRng() * availableRules.length)];
-    }
+    const rule = forcedRule !== null ? forcedRule : getRuleForLevel(currentLevel, diff);
 
     let mathModifier = null;
     if (rule === 'math') {
@@ -186,6 +203,10 @@ export default function useGameLogic() {
     setLevelData(newLevelData);
     setGameState('previewing'); // Level 1 is always normal, no need tutorial
     setSeenRules(new Set(['normal']));
+  };
+
+  const restartGame = () => {
+    startGame(difficulty, isMultiplayer, null, playerName);
   };
 
   const useHint = () => {
@@ -329,7 +350,32 @@ export default function useGameLogic() {
   const nextLevel = () => {
     const nextLvl = level + 1;
     setLevel(nextLvl);
-    const newLevelData = generateLevel(nextLvl, difficulty);
+    
+    if (nextLvl >= 6) {
+      let opt1 = getRuleForLevel(nextLvl, difficulty);
+      let opt2 = getRuleForLevel(nextLvl, difficulty);
+      while (opt1 === opt2) {
+        opt2 = getRuleForLevel(nextLvl, difficulty);
+      }
+      setModifierOptions([opt1, opt2]);
+      setGameState('choosingModifier');
+    } else {
+      const newLevelData = generateLevel(nextLvl, difficulty);
+      setLevelData(newLevelData);
+      
+      const ruleKey = newLevelData.rule === 'math' ? `math_${newLevelData.mathModifier}` : newLevelData.rule;
+      
+      if (!seenRules.has(ruleKey)) {
+        setGameState('tutorial');
+        setSeenRules(prev => new Set(prev).add(ruleKey));
+      } else {
+        setGameState('previewing');
+      }
+    }
+  };
+
+  const selectModifier = (rule) => {
+    const newLevelData = generateLevel(level, difficulty, rule);
     setLevelData(newLevelData);
     
     const ruleKey = newLevelData.rule === 'math' ? `math_${newLevelData.mathModifier}` : newLevelData.rule;
@@ -349,7 +395,7 @@ export default function useGameLogic() {
   return {
     gameState, level, lives, score, highScore, difficulty, playerName,
     levelData, playerSeq, activeFlash, clickedTile,
-    systemMessage, isErrorState, hintCost, freezeTimeLeft,
-    startGame, handleTileClick, nextLevel, startFromTutorial, useHint
+    systemMessage, isErrorState, hintCost, freezeTimeLeft, isMultiplayer, modifierOptions,
+    startGame, restartGame, handleTileClick, nextLevel, selectModifier, startFromTutorial, useHint
   };
 }

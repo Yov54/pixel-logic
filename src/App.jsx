@@ -124,7 +124,7 @@ export default function App() {
         return {
           title: 'Standard Array',
           desc: 'Observe the sequence. Reproduce exact index execution order.',
-          icon: <Zap className="w-5 h-5 text-theme-sand" />
+          icon: <Zap className="w-5 h-5 text-theme-mid" />
         };
     }
   };
@@ -181,7 +181,7 @@ export default function App() {
         isOpen={isPauseOpen}
         onResume={() => setIsPauseOpen(false)}
         onOpenSettings={() => setIsSettingsOpen(true)}
-        onRestart={() => { setIsPauseOpen(false); game.startGame(game.difficulty); }}
+        onRestart={() => { setIsPauseOpen(false); game.restartGame(); }}
         onQuit={() => { setIsPauseOpen(false); setAppMode('menu'); }}
       />
 
@@ -215,6 +215,7 @@ export default function App() {
         <GameBoard 
           game={game}
           ruleInfo={ruleInfo}
+          getRuleDescription={getRuleDescription}
           showHelpTooltip={showHelpTooltip}
           setShowHelpTooltip={setShowHelpTooltip}
           setManualTutorialOpen={setManualTutorialOpen}
